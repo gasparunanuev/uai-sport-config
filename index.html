@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>UAI Sport Bot</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="UAI Bot">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh}
+    .header{background:#003087;color:#fff;padding:20px 16px 16px}
+    .header h1{font-size:22px;font-weight:700}
+    .header p{font-size:13px;opacity:.8;margin-top:3px}
+    .container{padding:14px;max-width:540px;margin:0 auto}
+    .card{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .card h2{font-size:15px;font-weight:700;color:#003087;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+    label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+    input[type=text],input[type=password],input[type=time],textarea{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:15px;margin-bottom:13px;background:#fafafa;transition:border .15s}
+    input:focus,textarea:focus{outline:none;border-color:#003087;background:#fff}
+    textarea{resize:vertical;font-family:monospace;font-size:12px}
+    .days{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px}
+    .day-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e7eb;background:#fafafa;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:#444}
+    .day-btn.active{background:#003087;color:#fff;border-color:#003087}
+    .btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;margin-bottom:9px;transition:opacity .15s}
+    .btn:active{opacity:.85}
+    .btn-primary{background:#003087;color:#fff}
+    .btn-secondary{background:#f0f2f5;color:#333}
+    .btn-green{background:#16a34a;color:#fff}
+    .btn-yellow{background:#d97706;color:#fff}
+    .status{padding:11px 13px;border-radius:9px;font-size:14px;margin-top:6px;display:none;line-height:1.4}
+    .status.ok{background:#dcfce7;color:#166534;display:block}
+    .status.err{background:#fee2e2;color:#991b1b;display:block}
+    .status.inf{background:#dbeafe;color:#1e40af;display:block}
+    .reserva-card{border:1.5px solid #e5e7eb;border-radius:10px;padding:13px;margin-bottom:11px;position:relative}
+    .del-btn{position:absolute;top:10px;right:10px;background:none;border:none;color:#dc2626;font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+    .hint{font-size:12px;color:#888;margin-top:-9px;margin-bottom:13px;line-height:1.5}
+    .step{font-size:13px;color:#555;line-height:1.7;margin-bottom:12px}
+    .step b{color:#003087}
+    .bk-box{background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:14px;margin-bottom:13px}
+    .bk-box p{font-size:13px;color:#78350f;margin-bottom:10px;line-height:1.6}
+    .bk-link{display:inline-block;background:#f59e0b;color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px}
+    .badge{display:inline-block;background:#003087;color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;vertical-align:middle;margin-left:6px}
+    .divider{height:1px;background:#f0f2f5;margin:14px 0}
+    .small-btn{padding:8px 14px;border-radius:8px;border:none;background:#f0f2f5;color:#333;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px;margin-bottom:6px}
+    .small-btn.active{background:#003087;color:#fff}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>â½ UAI Sport Bot</h1>
+  <p>Configura tus reservas deportivas automÃ¡ticas</p>
+</div>
+
+<div class="container">
+
+  <!-- TOKEN -->
+  <div class="card">
+    <h2>ð GitHub Token</h2>
+    <label>Personal Access Token</label>
+    <input type="password" id="pat" placeholder="ghp_xxxxxxxxxxxx">
+    <p class="hint">
+      Necesario para guardar cambios. Se guarda solo en este dispositivo.<br>
+      <a href="https://github.com/settings/tokens/new?scopes=repo&description=UAI+Sport+Bot+Config" target="_blank" style="color:#003087">Crear token (scope: repo) â</a>
+    </p>
+    <button class="btn btn-secondary" onclick="savePAT()">Guardar token en dispositivo</button>
+    <div id="pat-status" class="status"></div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="card">
+    <h2>ð Mis Reservas</h2>
+    <div id="reservas-container"></div>
+    <button class="btn btn-secondary" onclick="addReserva()">ï¼ Agregar deporte</button>
+    <div class="divider"></div>
+    <button class="btn btn-primary" onclick="saveConfig()">ð¾ Guardar en GitHub</button>
+    <div id="config-status" class="status"></div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="card">
+    <h2>ð Renovar SesiÃ³n <span class="badge" id="cookies-badge">Activa</span></h2>
+
+    <p class="step">Cuando el bot te avise que la sesiÃ³n expirÃ³, sigue estos pasos:</p>
+
+    <p class="step">
+      <b>1.</b> Abre Safari en tu iPhone<br>
+      <b>2.</b> Ve a <code>intranet.uai.cl</code> e inicia sesiÃ³n con Microsoft<br>
+      <b>3.</b> Una vez dentro, toca el marcador <b>"ð Capturar Cookies UAI"</b><br>
+      <b>4.</b> Copia el JSON que aparece<br>
+      <b>5.</b> PÃ©galo abajo y toca "Actualizar SesiÃ³n"
+    </p>
+
+    <div class="bk-box">
+      <p><b>Instalar marcador (una sola vez):</b><br>
+      En tu iPhone Safari: toca Compartir â AÃ±adir a Favoritos â ponle nombre <b>"Capturar Cookies UAI"</b> â Guardar.<br>
+      Luego edita el favorito y reemplaza la URL por el cÃ³digo JavaScript que aparece abajo.</p>
+      <button class="small-btn" onclick="showBookmarklet()">Ver cÃ³digo del marcador</button>
+      <div id="bk-code" style="display:none;margin-top:10px">
+        <textarea id="bk-text" rows="4" style="font-size:11px" readonly></textarea>
+        <button class="small-btn" onclick="copyBK()">Copiar cÃ³digo</button>
+      </div>
+    </div>
+
+    <label>Pega aquÃ­ el JSON de cookies</label>
+    <textarea id="cookies-json" rows="5" placeholder='[{"name":"...","value":"...","domain":"intranet.uai.cl",...}]'></textarea>
+    <button class="btn btn-green" onclick="saveCookies()">ð Actualizar SesiÃ³n del Bot</button>
+    <div id="auth-status" class="status"></div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="card">
+    <h2>ð Notificaciones</h2>
+    <p class="step">
+      <b>1.</b> Descarga la app <b>ntfy</b> en tu iPhone (App Store)<br>
+      <b>2.</b> Toca "+" y suscrÃ­bete al tema: <code>uai-sport-gaspar-unanue</code><br>
+      <b>3.</b> Prueba que funciona:
+    </p>
+    <button class="btn btn-yellow" onclick="testNotif()">ð¨ Enviar notificaciÃ³n de prueba</button>
+    <div id="notif-status" class="status"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.11/dist/modules/libsodium-wrappers.js"></script>
+<script>
+const OWNER = 'gasparunanuev';
+const REPO = 'uai-sport-bot';
+const NTFY = 'uai-sport-gaspar-unanue';
+const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+const DIAS_S = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+
+const BK_CODE = `javascript:(function(){var c=document.cookie.split(';').filter(Boolean).map(function(p){var i=p.indexOf('=');return{name:p.substring(0,i).trim(),value:p.substring(i+1).trim(),domain:'intranet.uai.cl',path:'/',expires:-1,httpOnly:false,secure:true,sameSite:'Lax'};});var j=JSON.stringify(c,null,2);var d=window.open('about:blank');d.document.write('<meta name="viewport" content="width=device-width"><style>body{font-family:sans-serif;padding:16px}textarea{width:100%;height:180px;font-size:11px;margin:10px 0}button{background:#003087;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;width:100%}</style><h3>Copia este JSON:</h3><textarea id=t>'+j+'</textarea><button onclick="document.getElementById('\'t\'').select();document.execCommand('\'copy\'');this.textContent=\"\'â Copiado!\"\"">Copiar</button>');})();`;
+
+document.getElementById('bk-text').value = BK_CODE;
+
+function showBookmarklet(){
+  const d = document.getElementById('bk-code');
+  d.style.display = d.style.display==='none' ? 'block' : 'none';
+}
+function copyBK(){
+  const t = document.getElementById('bw-text');
+  t.select(); t.setSelectionRange(0,99999);
+  navigator.clipboard.writeText(t.value).then(()=>alert('CÃ³digo copiado. Ahora pÃ©galo como URL del marcador.')).catch(()=>{ document.execCommand('copy'); alert('CÃ³digo copiado.'); });
+}
+
+let configData = {reservas:[]};
+let configSHA = '';
+
+window.addEventListener('load', async ()=>{
+  const savedPAT = localStorage.getItem('uai_pat');
+  if(savedPAT) document.getElementById('pat').value = savedPAT;
+  await loadConfig();
+});
+
+function savePAT(){
+  const v = document.getElementById('pat').value.trim();
+  if(!v){ showStatus('pat-status','err','Ingresa un token vÃ¡lido'); return; }
+  localStorage.setItem('uai_pat', v);
+  showStatus('pat-status','ok','â Token guardado en este dispositivo');
+}
+
+function getPAT(){ return localStorage.getItem('uai_pat') || document.getElementById('pat').value.trim(); }
+
+async function loadConfig(){
+  try{
+    const pat = getPAT();
+    const h = pat ? {'Authorization':'token '+pat} : {};
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/config.json`,{headers:h});
+    if(!r.ok) throw new Error();
+    const d = await r.json();
+    configSHA = d.sha;
+    configData = JSON.parse(atob(d.content));
+    renderReservas();
+  } catch(e){
+    renderReservas();
+  }
+}
+
+function renderReservas(){
+  const c = document.getElementById('reservas-container');
+  c.innerHTML = '';
+  (configData.reservas||[]).forEach((r,i) => c.appendChild(mkReservaEl(r,i)));
+  if(!configData.reservas?.length){
+    const p = document.createElement('p');
+    p.className='hint'; p.style.marginBottom='13px';
+    p.textContent='No hay reservas configuradas. Agrega una abajo.';
+    c.appendChild(p);
+  }
+}
+
+function mkReservaEl(r, i){
+  const div = document.createElement('div');
+  div.className = 'reserva-card';
+  div.innerHTML = `
+    <button class="del-btn" onclick="delReserva(${i})" title="Eliminar">Ã</button>
+    <label>Deporte</label>
+    <input type="text" placeholder="Ej: Futbolito Hombres" value="${escHtml(r.deporte||'')}" data-i="${i}" data-f="deporte">
+    <label>Hora inicio</label>
+    <input type="time" value="${r.hora_inicio||'16:30'}" data-i="${i}" data-f="hora_inicio">
+    <label>DÃ­as</label>
+    <div class="days">
+      ${DIAS.map((d,j)=>`<button class="day-btn${(r.dias||[]).includes(d)?' active':''}" onclick="toggleDay(this,'${d}',${i})">${DIAS_S[j]}</button>`).join('')}
+    </div>`;
+  div.querySelectorAll('input').forEach(el=>el.addEventListener('input',syncDOM));
+  return div;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toggleDay(btn, dia, idx){
+  btn.classList.toggle('active');
+  syncDOM();
+}
+
+function syncDOM(){
+  const items = document.querySelectorAll('.reserva-card');
+  configData.reservas = Array.from(items).map((el,i)=>({
+    deporte: el.querySelector('[data-f="deporte"]').value,
+    hora_inicio: el.querySelector('[data-f="hora_inicio"]').value,
+    dias: Array.from(el.querySelectorAll('.day-btn.active')).map(b=>DIAS[(DIAS_S.indexOf(b.textContent)])
+  }));
+}
+
+function addReserva(){
+  syncDOM();
+  configData.reservas.push({deporte:'',hora_inicio:'16:30',dias:[]});
+  renderReservas();
+}
+
+function delReserva(i){
+  syncDOM();
+  configData.reservas.splice(i,1);
+  renderReservas();
+}
+
+async function saveConfig(){
+  syncDOM();
+  const pat = getPAT();
+  if(!pat){ showStatus('config-status','err','Necesitas ingresar tu GitHub token arriba'); return; }
+  showStatus('config-status','inf','Guardando en GitHub...');
+  try{
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(configData,null,2)+'\n')));
+    const body = {message:'Update config via web app',content,sha:configSHA||undefined};
+    if(!configSHA) delete body.sha;
+    const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/config.json`,{
+      method:'PUT',
+      headers:{'Authorization':'token '+pat,'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok){ const e=await r.json(); throw new Error(e.message||r.status); }
+    const data = await r.json();
+    configSHA = data.content.sha;
+    showStatus('config-status','ok','â Guardado correctamente en GitHub');
+  } catch(e){
+    showStatus('config-status','err','Error: '+e.message);
+  }
+}
+
+async function saveCookies(){
+  const pat = getPAT();
+  if(!pat){ showStatus('auth-status','err','Ingresa tu GitHub token arriba'); return; }
+  const txt = document.getElementById('cookies-json').value.trim();
+  if(!txt){ showStatus('auth-status','err','Pega el JSON de cookies'); return; }
+  try{ JSON.parse(txt); } catch(e){ showStatus('auth-status','err','El JSON no es vÃ¡lido. Revisa que estÃ© bien copiado.'); return; }
+  showStatus('auth-status','inf','Cifrando y subiendo sesiÃ³n...');
+  try{
+    await sodium.ready;
+    const kr = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/secrets/public-key`,{headers:{'Authorization':'token '+pat}});
+    if(!kr.ok) throw new Error('No se pudo obtener la clave pÃºblica. Verifica que el token tenga scope "repo".');
+    const kd = await kr.json();
+    const msg = sodium.from_string(txt);
+    const key = sodium.from_base64(kd.key, sodium.base64_variants.ORIGINAL);
+    const enc = sodium.crypto_box_seal(msg, key);
+    const encB64 = sodium.to_base64(enc, sodium.base64_variants.ORIGINAL);
+    const sr = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/secrets/COOKIES_JSON`,{
+      method:'PUT',
+      headers:{'Authorization':'token '+pat,'Content-Type':'application/json'},
+      body:JSON.stringify({encrypted_value:encB64, key_id:kd.key_id})
+    });
+    if(!sr.ok && sr.status!==204) throw new Error('Error al actualizar secret: '+sr.status);
+    document.getElementById('cookies-badge').textContent = 'â Actualizada';
+    document.getElementById('cookies-badge').style.background = '#16a34a';
+    showStatus('auth-status','ok','â SesiÃ³n renovada exitosamente. El bot usarÃ¡ las nuevas cookies en el prÃ³ximo ciclo.');
+  } catch(e){
+    showStatus('auth-status','err','Error: '+e.message);
+  }
+}
+
+async function testNotif(){
+  showStatus('notif-status','inf','Enviando...');
+  try{
+    await fetch(`https://ntfy.sh/${NTFY}`,{method:'POST',body:'ð§ª UAI Bot funcionando correctamente!'});
+    showStatus('notif-status','ok','â NotificaciÃ³n enviada. Revisa la app ntfy en tu telÃ©fono.');
+  } catch(e){
+    showStatus('notif-status','err','Error: '+e.message);
+  }
+}
+
+function showStatus(id, type, msg){
+  const el = document.getElementById(id);
+  el.className = 'status '+type;
+  el.textContent = msg;
+}
+</script>
+</body>
+</html>
