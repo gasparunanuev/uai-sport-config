@@ -196,6 +196,23 @@
       border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:600;color:var(--blue);
       font-family:'Courier New',monospace;margin-top:4px}
 
+    /* ── SPORT SEARCH SELECT ── */
+    .sport-wrap{position:relative;margin-bottom:13px}
+    .sport-wrap .sport-inp{margin-bottom:0}
+    .sport-dd{position:absolute;top:calc(100% - 2px);left:0;right:0;
+      background:#131929;border:1.5px solid rgba(0,230,118,.4);border-top:none;
+      border-radius:0 0 var(--r-sm) var(--r-sm);overflow:hidden;z-index:100;
+      display:none;max-height:210px;overflow-y:auto;
+      box-shadow:0 12px 28px rgba(0,0,0,.5)}
+    .sport-wrap.open .sport-dd{display:block}
+    .sport-wrap.open .sport-inp{border-color:rgba(0,230,118,.45);background:rgba(0,230,118,.025);
+      border-radius:var(--r-sm) var(--r-sm) 0 0}
+    .sport-opt{padding:11px 13px;font-size:13.5px;color:var(--text);cursor:pointer;
+      border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}
+    .sport-opt:last-child{border-bottom:none}
+    .sport-opt:active,.sport-opt:hover{background:rgba(0,230,118,.12);color:#fff}
+    .sport-opt.no-result{color:var(--text-dim);font-style:italic;cursor:default;font-size:12.5px}
+
     /* ── MISC ── */
     .divider{height:1px;background:var(--border);margin:13px 0}
     .hint{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:13px}
@@ -284,7 +301,7 @@
       <div id="rlist"></div>
       <button class="btn btn-ghost" onclick="addR()">+ Agregar deporte</button>
       <div class="divider"></div>
-      <button class="btn btn-primary" onclick="saveConfig(this)">💾 Guardar en GitHub</button>
+      <button class="btn btn-primary" onclick="saveConfig(this)">💾 Guardar deporte</button>
       <div id="s-cfg" class="status"></div>
     </div>
   </div>
@@ -403,6 +420,11 @@
 const OWN = 'gasparunanuev', REPO = 'uai-sport-bot', NTFY = 'uai-sport-gaspar-unanue';
 const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
 const DS   = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+const DEPORTES = [
+  'Futbolito Hombres','Futbolito Damas','Futbolito Mixto',
+  'Tenis','Pádel','Básquetbol','Básquetbol Mixto',
+  'Vóleibol','Vóleibol Mixto','Squash','Tenis de Mesa','Badminton','Natación'
+];
 
 const BK = `javascript:(function(){var c=document.cookie.split(';').filter(Boolean).map(function(p){var i=p.indexOf('=');return{name:p.substring(0,i).trim(),value:p.substring(i+1).trim(),domain:'intranet.uai.cl',path:'/',expires:-1,httpOnly:false,secure:true,sameSite:'Lax'};});var j=JSON.stringify(c,null,2);var w=window.open('about:blank');w.document.write('<meta name="viewport" content="width=device-width"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;padding:16px;background:#070a11;color:#dde5f5}h3{margin-bottom:12px;font-size:16px}textarea{width:100%;height:170px;font-size:10.5px;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#dde5f5;border-radius:8px;margin-bottom:10px;font-family:monospace}button{width:100%;background:#00e676;color:#07090f;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}</style><h3>Copia este JSON de cookies:</h3><textarea id=t>'+j+'</textarea><button onclick="document.getElementById(\'t\').select();document.execCommand(\'copy\');this.textContent=\'✅ Copiado!\'">Copiar todo</button>');})();`;
 document.getElementById('bk-txt').value = BK;
@@ -474,14 +496,51 @@ function mkR(r,i) {
   const d = document.createElement('div'); d.className='ritem';
   d.innerHTML = `
     <div class="ritem-hdr"><span class="ritem-label">Deporte ${i+1}</span><button class="btn-x" onclick="delR(${i})">×</button></div>
-    <div class="lbl">Nombre del deporte (como aparece en el intranet)</div>
-    <input type="text" placeholder="Ej: Futbolito Hombres, Tenis, Pádel..." value="${esc(r.deporte||'')}" data-i="${i}" data-f="dep">
+    <div class="lbl">Nombre del deporte</div>
+    <div class="sport-wrap">
+      <input type="text" class="sport-inp" placeholder="Buscar deporte..." value="${esc(r.deporte||'')}" data-i="${i}" data-f="dep" autocomplete="off">
+      <div class="sport-dd"></div>
+    </div>
     <div class="lbl">Hora de inicio</div>
     <input type="time" value="${r.hora_inicio||'16:30'}" data-i="${i}" data-f="hora">
     <div class="dp-lbl">Días que quieres jugar (toca para seleccionar)</div>
     <div class="dp">${DIAS.map((dia,j)=>`<button class="dp-btn${(r.dias||[]).includes(dia)?' active':''}" onclick="toggleD(this,'${dia}',${i})">${DS[j]}</button>`).join('')}</div>`;
-  d.querySelectorAll('input').forEach(el=>el.addEventListener('input',syncR));
+  d.querySelector('[data-f="hora"]').addEventListener('input', syncR);
+  initSportSelect(d.querySelector('.sport-wrap'));
   return d;
+}
+
+function initSportSelect(wrap) {
+  const inp = wrap.querySelector('.sport-inp');
+  const dd  = wrap.querySelector('.sport-dd');
+
+  function renderDD(q) {
+    const matches = DEPORTES.filter(s => !q || s.toLowerCase().includes(q.toLowerCase()));
+    dd.innerHTML = matches.length
+      ? matches.map(s => `<div class="sport-opt">${esc(s)}</div>`).join('')
+      : '<div class="sport-opt no-result">No encontrado — puedes escribir el nombre exacto</div>';
+  }
+
+  inp.addEventListener('focus', () => { renderDD(inp.value); wrap.classList.add('open'); });
+  inp.addEventListener('input', () => { renderDD(inp.value); wrap.classList.add('open'); syncR(); });
+  inp.addEventListener('blur',  () => setTimeout(() => wrap.classList.remove('open'), 200));
+
+  dd.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const opt = e.target.closest('.sport-opt:not(.no-result)');
+    if (!opt) return;
+    inp.value = opt.textContent.trim();
+    wrap.classList.remove('open');
+    syncR();
+  });
+  dd.addEventListener('touchstart', e => {
+    const opt = e.target.closest('.sport-opt:not(.no-result)');
+    if (!opt) return;
+    e.preventDefault();
+    inp.value = opt.textContent.trim();
+    wrap.classList.remove('open');
+    syncR();
+  }, {passive: false});
 }
 
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
