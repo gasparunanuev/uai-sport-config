@@ -1,657 +1,684 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>UAI Sport Bot</title>
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="UAI Bot">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #070a11;
-      --surface: #0d1120;
-      --card: #101622;
-      --border: rgba(255,255,255,0.06);
-      --border-lit: rgba(0,230,118,0.25);
-      --accent: #00e676;
-      --accent-dim: rgba(0,230,118,0.12);
-      --blue: #4d9fff;
-      --blue-dim: rgba(77,159,255,0.12);
-      --orange: #ff7043;
-      --text: #dde5f5;
-      --text-muted: rgba(221,229,245,0.5);
-      --text-dim: rgba(221,229,245,0.25);
-      --ok-bg: rgba(0,200,83,0.1); --ok-border: rgba(0,200,83,0.3); --ok: #00c853;
-      --err-bg: rgba(255,82,82,0.1); --err-border: rgba(255,82,82,0.3); --err: #ff5252;
-      --inf-bg: rgba(77,159,255,0.1); --inf-border: rgba(77,159,255,0.3); --inf: #82b1ff;
-      --r: 16px; --r-sm: 10px;
-      --font-d: 'Bebas Neue', sans-serif;
-      --font-b: 'Plus Jakarta Sans', sans-serif;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>UAI Sport Bot</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="UAI Bot">
+<meta name="theme-color" content="#070a11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070a11; --surface:#0d1120; --card:#101622; --card-hi:#141b2b;
+  --border:rgba(255,255,255,.07); --border-lit:rgba(0,230,118,.28);
+  --accent:#00e676; --accent-dim:rgba(0,230,118,.12);
+  --blue:#4d9fff; --blue-dim:rgba(77,159,255,.12);
+  --orange:#ff7043; --orange-dim:rgba(255,112,67,.12);
+  --text:#dde5f5; --muted:rgba(221,229,245,.55); --dim:rgba(221,229,245,.28);
+  --ok:#00c853; --err:#ff5252;
+  --r:18px; --r-sm:11px;
+  --fd:'Bebas Neue',sans-serif; --fb:'Plus Jakarta Sans',sans-serif;
+  --fm:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100dvh;
+  overflow-x:hidden;padding-bottom:calc(48px + env(safe-area-inset-bottom))}
+body::before{content:'';position:fixed;inset:0;opacity:.35;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 16px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-    /* Subtle noise */
-    body::before{content:'';position:fixed;inset:0;opacity:.4;pointer-events:none;z-index:0;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+/* ── TOPBAR ── */
+.top{display:flex;align-items:center;justify-content:space-between;
+  padding:calc(18px + env(safe-area-inset-top)) 0 18px}
+.brand{font-family:var(--fd);font-size:23px;letter-spacing:1.6px;color:#fff;line-height:1}
+.brand em{color:var(--accent);font-style:normal}
+.live{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);
+  border:1px solid var(--border-lit);border-radius:100px;padding:5px 11px;
+  font-size:10.5px;font-weight:700;color:var(--accent);letter-spacing:.7px;text-transform:uppercase}
+.live.off{background:var(--orange-dim);border-color:rgba(255,112,67,.3);color:var(--orange)}
+.live .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-    /* ── HEADER ── */
-    .hdr{padding:44px 20px 20px;position:relative;overflow:hidden;z-index:1}
-    .hdr::after{content:'';position:absolute;top:-60px;right:-30px;width:220px;height:220px;
-      background:radial-gradient(circle,rgba(0,230,118,.07) 0%,transparent 70%);pointer-events:none}
-    .hdr-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);
-      border:1px solid var(--border-lit);border-radius:100px;padding:5px 12px;
-      font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:14px}
-    .hdr-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
-    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.4)}50%{box-shadow:0 0 0 5px rgba(0,230,118,0)}}
-    .hdr h1{font-family:var(--font-d);font-size:54px;line-height:.92;letter-spacing:2px;color:#fff}
-    .hdr h1 em{color:var(--accent);font-style:normal}
-    .hdr-sub{margin-top:10px;font-size:13px;color:var(--text-muted);line-height:1.5;max-width:260px}
+/* ── HERO: MAÑANA ── */
+.hero{background:linear-gradient(168deg,var(--card-hi),var(--card));
+  border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.hero.locked{border-color:rgba(255,112,67,.28)}
+.hero.empty{border-style:dashed;border-color:rgba(255,255,255,.13)}
 
-    /* ── CONTAINER ── */
-    .wrap{padding:0 16px 90px;max-width:540px;margin:0 auto;position:relative;z-index:1}
+.hero-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:18px 18px 0}
+.eyebrow{font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--dim)}
+.hero-date{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
 
-    /* ── STATUS STRIP ── */
-    .status-strip{background:linear-gradient(135deg,rgba(0,230,118,.07),rgba(0,230,118,.02));
-      border:1px solid rgba(0,230,118,.14);border-radius:var(--r);padding:15px 16px;
-      margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
-      animation:fadeUp .4s ease}
-    .ss-left{display:flex;align-items:center;gap:11px}
-    .ss-icon{width:38px;height:38px;border-radius:50%;background:rgba(0,230,118,.1);
-      border:1px solid rgba(0,230,118,.2);display:flex;align-items:center;justify-content:center;font-size:17px}
-    .ss-title{font-family:var(--font-d);font-size:17px;letter-spacing:.5px;color:#fff;line-height:1}
-    .ss-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
-    .ss-badge{display:flex;align-items:center;gap:5px;background:rgba(0,230,118,.1);
-      border:1px solid rgba(0,230,118,.22);border-radius:100px;padding:5px 11px;
-      font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.4px}
-    .ss-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.plan{padding:12px 18px 18px}
+.plan-sport{font-family:var(--fd);font-size:clamp(34px,10vw,46px);line-height:.95;
+  letter-spacing:1.2px;color:#fff}
+.plan-time{display:flex;align-items:baseline;gap:9px;margin-top:8px}
+.plan-time b{font-family:var(--fd);font-size:30px;letter-spacing:1.5px;color:var(--accent);line-height:1}
+.hero.locked .plan-time b{color:var(--orange)}
+.plan-time span{font-size:12.5px;color:var(--muted)}
+.plan-none{font-family:var(--fd);font-size:30px;letter-spacing:1.2px;color:var(--dim);line-height:1.05}
+.plan-none+.plan-sub{margin-top:9px}
+.plan-sub{font-size:13px;color:var(--muted);line-height:1.5}
 
-    /* ── SECTION HEADING ── */
-    .sec-heading{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
-      letter-spacing:1.5px;margin:22px 0 12px;display:flex;align-items:center;gap:10px}
-    .sec-heading::after{content:'';flex:1;height:1px;background:var(--border)}
+.src{display:inline-flex;align-items:center;gap:6px;margin-top:13px;border-radius:100px;
+  padding:5px 11px;font-size:11px;font-weight:700;letter-spacing:.3px;
+  background:var(--blue-dim);border:1px solid rgba(77,159,255,.22);color:var(--blue)}
+.src.pick{background:var(--accent-dim);border-color:var(--border-lit);color:var(--accent)}
+.src.skip{background:var(--orange-dim);border-color:rgba(255,112,67,.28);color:var(--orange)}
 
-    /* ── STEP CARD ── */
-    .scard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
-      margin-bottom:10px;overflow:hidden;transition:border-color .2s;animation:fadeUp .4s ease backwards}
-    .scard:nth-child(1){animation-delay:.05s}.scard:nth-child(2){animation-delay:.1s}
-    .scard:nth-child(3){animation-delay:.15s}.scard:nth-child(4){animation-delay:.2s}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-    .scard.active{border-color:rgba(0,230,118,.2)}
-    .scard.done{border-color:rgba(0,230,118,.15)}
+/* ── SIGNATURE: BARRA DE LA NOCHE ── */
+.night{padding:0 18px 16px}
+.night-track{position:relative;height:4px;border-radius:4px;background:rgba(255,255,255,.07);overflow:visible}
+.night-fill{position:absolute;inset:0 auto 0 0;border-radius:4px;
+  background:linear-gradient(90deg,rgba(0,230,118,.35),var(--accent));
+  transition:width 1s linear}
+.hero.locked .night-fill{background:linear-gradient(90deg,rgba(255,112,67,.4),var(--orange))}
+.night-mark{position:absolute;top:-3px;width:2px;height:10px;border-radius:2px;background:rgba(255,255,255,.3)}
+.night-legend{display:flex;justify-content:space-between;margin-top:9px;font-size:10.5px;
+  letter-spacing:.5px;color:var(--dim);font-family:var(--fm)}
+.night-legend b{color:var(--muted);font-weight:600}
+.night-msg{margin-top:11px;font-size:13px;line-height:1.5;color:var(--muted)}
+.night-msg strong{color:var(--text);font-variant-numeric:tabular-nums}
+.hero.locked .night-msg strong{color:var(--orange)}
 
-    .scard-hdr{display:flex;align-items:center;gap:13px;padding:16px 16px;cursor:pointer;user-select:none;-webkit-user-select:none}
-    .scard-hdr:active{background:rgba(255,255,255,.02)}
+/* ── ACCIONES ── */
+.hero-act{display:flex;gap:9px;padding:0 18px 18px}
+.hero-act .btn{margin:0}
+.hero-act #b-change{flex:2}
+.hero-act #b-skip{flex:1;font-size:13px}
 
-    .step-num{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.04);
-      border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
-      font-family:var(--font-d);font-size:17px;color:var(--text-dim);flex-shrink:0;transition:all .25s}
-    .scard.active .step-num{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-    .scard.done .step-num{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.4);color:var(--accent);font-size:16px}
+/* ── EDITOR ── */
+.editor{border-top:1px solid var(--border);padding:18px;display:none;background:rgba(0,0,0,.16)}
+.editor.open{display:block}
 
-    .scard-info{flex:1;min-width:0}
-    .scard-title{font-family:var(--font-d);font-size:19px;letter-spacing:1px;color:#fff;line-height:1}
-    .scard-desc{font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+/* ── BOTONES ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  padding:13px 16px;border:1px solid transparent;border-radius:var(--r-sm);
+  font-family:var(--fb);font-size:14px;font-weight:700;letter-spacing:.15px;
+  cursor:pointer;transition:transform .14s,background .18s,opacity .18s;margin-bottom:9px}
+.btn:active{transform:scale(.975)}
+.btn-primary{background:var(--accent);color:#06090f}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border-color:var(--border)}
+.btn-warn{background:var(--orange-dim);color:var(--orange);border-color:rgba(255,112,67,.28)}
+.btn-blue{background:var(--blue-dim);color:var(--blue);border-color:rgba(77,159,255,.22)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn:disabled:active{transform:none}
+.btn-sm{width:auto;padding:9px 13px;font-size:12.5px;margin:0}
 
-    .chevron{color:var(--text-dim);font-size:16px;transition:transform .25s ease;flex-shrink:0}
-    .scard.open .chevron{transform:rotate(180deg)}
+/* ── CAMPOS ── */
+.lbl{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.9px;margin-bottom:7px;display:block}
+input[type=text],input[type=password],input[type=time]{
+  width:100%;padding:12px 13px;background:rgba(255,255,255,.04);
+  border:1.5px solid var(--border);border-radius:var(--r-sm);
+  font-family:var(--fb);font-size:16px;color:var(--text);
+  transition:border-color .18s,background .18s;margin-bottom:14px;-webkit-appearance:none}
+input:focus{outline:none;border-color:rgba(0,230,118,.5);background:rgba(0,230,118,.03)}
+input::placeholder{color:var(--dim)}
+input[type=time]{font-family:var(--fm);letter-spacing:.5px}
 
-    .scard-sep{height:1px;background:var(--border);display:none;margin:0 16px}
-    .scard.open .scard-sep{display:block}
+/* ── SELECTOR DEPORTE ── */
+.sport{position:relative;margin-bottom:14px}
+.sport input{margin-bottom:0}
+.sport-dd{position:absolute;top:calc(100% - 2px);left:0;right:0;background:#141a2a;
+  border:1.5px solid rgba(0,230,118,.42);border-top:none;border-radius:0 0 var(--r-sm) var(--r-sm);
+  z-index:60;display:none;max-height:216px;overflow-y:auto;box-shadow:0 16px 34px rgba(0,0,0,.55)}
+.sport.open .sport-dd{display:block}
+.sport.open input{border-color:rgba(0,230,118,.5);border-radius:var(--r-sm) var(--r-sm) 0 0}
+.sport-opt{padding:12px 13px;font-size:14px;color:var(--text);cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.045)}
+.sport-opt:last-child{border-bottom:none}
+.sport-opt:hover,.sport-opt:active{background:rgba(0,230,118,.13);color:#fff}
+.sport-opt.none{color:var(--dim);font-style:italic;font-size:13px;cursor:default}
 
-    .scard-body{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .38s ease,padding .25s ease}
-    .scard.open .scard-body{max-height:1400px;padding:16px 16px 20px}
+/* ── SECCIONES PLEGABLES ── */
+.sec{margin-top:11px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden}
+.sec-hd{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;
+  user-select:none;-webkit-user-select:none;width:100%;background:none;border:none;
+  text-align:left;font-family:var(--fb);color:inherit}
+.sec-hd:active{background:rgba(255,255,255,.025)}
+.sec-ico{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0}
+.sec-tt{flex:1;min-width:0}
+.sec-tt h2{font-family:var(--fd);font-size:17px;letter-spacing:.9px;color:#fff;
+  line-height:1;font-weight:400}
+.sec-tt p{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{color:var(--dim);font-size:13px;transition:transform .28s;flex-shrink:0}
+.sec.open .chev{transform:rotate(180deg)}
+.sec-bd{max-height:0;overflow:hidden;transition:max-height .34s ease;padding:0 16px}
+.sec.open .sec-bd{max-height:1600px;padding:2px 16px 18px}
+.sec.done .sec-ico{background:var(--accent-dim);border-color:rgba(0,230,118,.3)}
 
-    /* ── PURPOSE BOX ── */
-    .purpose{background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.12);
-      border-radius:var(--r-sm);padding:12px 13px;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
-    .purpose-icon{font-size:15px;flex-shrink:0;margin-top:1px}
-    .purpose-text{font-size:12.5px;color:rgba(0,230,118,.75);line-height:1.55}
-    .purpose-text strong{color:var(--accent);display:block;margin-bottom:3px}
+/* ── DIAS ── */
+.days{display:flex;gap:5px;margin-bottom:14px}
+.day{flex:1;aspect-ratio:1;max-width:44px;border-radius:50%;border:1.5px solid var(--border);
+  background:rgba(255,255,255,.03);color:var(--muted);font-family:var(--fb);
+  font-size:11px;font-weight:800;cursor:pointer;transition:all .16s;
+  display:flex;align-items:center;justify-content:center}
+.day.on{background:var(--accent);border-color:var(--accent);color:#06090f}
+.day:active{transform:scale(.9)}
 
-    /* ── FIELDS ── */
-    .lbl{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;
-      letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-    .lbl-tag{background:rgba(255,255,255,.06);border-radius:4px;padding:1px 6px;font-size:9.5px}
+/* ── ITEM RECURRENTE ── */
+.ritem{background:rgba(255,255,255,.025);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:14px;margin-bottom:10px}
+.ritem-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ritem-hd span{font-family:var(--fd);font-size:14px;letter-spacing:.6px;color:var(--muted)}
+.x{background:none;border:none;color:var(--dim);font-size:21px;cursor:pointer;
+  padding:0 4px;line-height:1}
+.x:hover{color:var(--err)}
 
-    input[type=text],input[type=password],input[type=time],textarea{
-      width:100%;padding:11px 13px;background:rgba(255,255,255,.035);
-      border:1.5px solid var(--border);border-radius:var(--r-sm);
-      font-family:var(--font-b);font-size:14px;color:var(--text);
-      transition:border-color .2s,background .2s;margin-bottom:13px;-webkit-appearance:none}
-    input:focus,textarea:focus{outline:none;border-color:rgba(0,230,118,.45);background:rgba(0,230,118,.025)}
-    input::placeholder,textarea::placeholder{color:var(--text-dim)}
-    textarea{resize:vertical;font-size:11.5px;font-family:'Courier New',monospace;line-height:1.5}
+/* ── ESTADO / NOTAS ── */
+.msg{padding:11px 13px;border-radius:var(--r-sm);font-size:13px;line-height:1.5;
+  display:none;margin-top:10px;border:1px solid;font-weight:500}
+.msg.ok{display:block;background:rgba(0,200,83,.1);border-color:rgba(0,200,83,.3);color:var(--ok)}
+.msg.err{display:block;background:rgba(255,82,82,.1);border-color:rgba(255,82,82,.3);color:var(--err)}
+.msg.inf{display:block;background:var(--blue-dim);border-color:rgba(77,159,255,.3);color:var(--blue)}
+.note{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.note a{color:var(--blue);text-decoration:none}
+.note a:active{text-decoration:underline}
+.note code,.mono{font-family:var(--fm);font-size:11.5px;background:rgba(255,255,255,.06);
+  padding:2px 6px;border-radius:5px;color:var(--text)}
+.rule{height:1px;background:var(--border);margin:15px 0}
 
-    /* ── BUTTONS ── */
-    .btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px 18px;
-      border:none;border-radius:var(--r-sm);font-family:var(--font-b);font-size:14px;font-weight:700;
-      cursor:pointer;transition:all .18s;margin-bottom:9px;letter-spacing:.2px;position:relative;overflow:hidden}
-    .btn:active{transform:scale(.97)}
-    .btn-primary{background:var(--accent);color:#07090f}
-    .btn-primary:hover{background:#1aeb87}
-    .btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
-    .btn-ghost:hover{background:rgba(255,255,255,.08)}
-    .btn-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(77,159,255,.2)}
-    .btn-blue:hover{background:rgba(77,159,255,.18)}
-    .btn-sm{padding:8px 13px;font-size:12px;width:auto;display:inline-flex;margin-bottom:0;border-radius:8px}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
+.state{display:flex;align-items:center;gap:11px;padding:13px;border-radius:var(--r-sm);
+  border:1px solid;margin-bottom:14px}
+.state.ok{background:rgba(0,200,83,.08);border-color:rgba(0,200,83,.26)}
+.state.warn{background:var(--orange-dim);border-color:rgba(255,112,67,.28)}
+.state-t{font-size:13.5px;font-weight:700;line-height:1.3}
+.state.ok .state-t{color:var(--ok)} .state.warn .state-t{color:var(--orange)}
+.state-s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
 
-    /* ── STATUS MSGS ── */
-    .status{padding:11px 13px;border-radius:var(--r-sm);font-size:13px;
-      display:none;margin-top:6px;line-height:1.45;border:1px solid;font-weight:500}
-    .status.ok{background:var(--ok-bg);border-color:var(--ok-border);color:var(--ok);display:block}
-    .status.err{background:var(--err-bg);border-color:var(--err-border);color:var(--err);display:block}
-    .status.inf{background:var(--inf-bg);border-color:var(--inf-border);color:var(--inf);display:block}
+.step{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--border)}
+.step:last-of-type{border-bottom:none}
+.step b{width:22px;height:22px;border-radius:50%;background:var(--blue-dim);
+  border:1px solid rgba(77,159,255,.25);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--blue);flex-shrink:0;margin-top:1px}
+.step div{font-size:13px;color:var(--muted);line-height:1.55}
+.step strong{color:var(--text)}
 
-    /* ── RESERVA ITEM ── */
-    .ritem{background:rgba(255,255,255,.025);border:1px solid var(--border);
-      border-radius:var(--r-sm);padding:13px;margin-bottom:10px;position:relative}
-    .ritem-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-    .ritem-label{font-family:var(--font-d);font-size:14px;letter-spacing:.5px;color:var(--text-muted)}
-    .btn-x{background:none;border:none;color:var(--text-dim);font-size:20px;
-      cursor:pointer;padding:0 3px;line-height:1;transition:color .15s}
-    .btn-x:hover{color:var(--err)}
-
-    /* ── DAY PICKER ── */
-    .dp-lbl{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
-    .dp{display:flex;gap:5px;margin-bottom:13px}
-    .dp-btn{flex:1;aspect-ratio:1;max-width:42px;border-radius:50%;border:1.5px solid var(--border);
-      background:rgba(255,255,255,.03);color:var(--text-muted);font-family:var(--font-b);
-      font-size:10.5px;font-weight:700;cursor:pointer;transition:all .18s;
-      display:flex;align-items:center;justify-content:center}
-    .dp-btn.active{background:var(--accent);border-color:var(--accent);color:#07090f;font-weight:800}
-    .dp-btn:active{transform:scale(.88)}
-
-    /* ── TIMELINE ── */
-    .tl{margin-bottom:14px}
-    .tl-item{display:flex;gap:13px;padding-bottom:16px;position:relative}
-    .tl-item:last-child{padding-bottom:0}
-    .tl-item:not(:last-child)::before{content:'';position:absolute;left:14px;top:30px;bottom:0;width:1px;background:var(--border)}
-    .tl-dot{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.04);
-      border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
-      font-family:var(--font-d);font-size:15px;color:var(--text-dim);flex-shrink:0}
-    .tl-content{padding-top:5px;flex:1}
-    .tl-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-    .tl-sub{font-size:12px;color:var(--text-muted);line-height:1.5}
-    .tl-sub code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;font-size:11px;font-family:'Courier New',monospace}
-
-    /* ── BOOKMARKLET BOX ── */
-    .bk-box{background:rgba(255,171,0,.05);border:1px solid rgba(255,171,0,.18);
-      border-radius:var(--r-sm);padding:13px;margin-bottom:13px}
-    .bk-title{font-size:11px;font-weight:700;color:#ffab00;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-    .bk-body{font-size:12px;color:rgba(255,171,0,.65);line-height:1.6;margin-bottom:9px}
-
-    /* ── NOTIF STEPS ── */
-    .nstep{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
-    .nstep:last-of-type{border-bottom:none}
-    .nstep-n{width:23px;height:23px;border-radius:50%;background:var(--blue-dim);border:1px solid rgba(77,159,255,.25);
-      display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--blue);flex-shrink:0;margin-top:1px}
-    .nstep-text{font-size:13px;color:var(--text-muted);line-height:1.5}
-    .nstep-text strong{color:var(--text)}
-    .ntopic{display:inline-block;background:var(--blue-dim);border:1px solid rgba(77,159,255,.22);
-      border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:600;color:var(--blue);
-      font-family:'Courier New',monospace;margin-top:4px}
-
-    /* ── SPORT SEARCH SELECT ── */
-    .sport-wrap{position:relative;margin-bottom:13px}
-    .sport-wrap .sport-inp{margin-bottom:0}
-    .sport-dd{position:absolute;top:calc(100% - 2px);left:0;right:0;
-      background:#131929;border:1.5px solid rgba(0,230,118,.4);border-top:none;
-      border-radius:0 0 var(--r-sm) var(--r-sm);overflow:hidden;z-index:100;
-      display:none;max-height:210px;overflow-y:auto;
-      box-shadow:0 12px 28px rgba(0,0,0,.5)}
-    .sport-wrap.open .sport-dd{display:block}
-    .sport-wrap.open .sport-inp{border-color:rgba(0,230,118,.45);background:rgba(0,230,118,.025);
-      border-radius:var(--r-sm) var(--r-sm) 0 0}
-    .sport-opt{padding:11px 13px;font-size:13.5px;color:var(--text);cursor:pointer;
-      border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}
-    .sport-opt:last-child{border-bottom:none}
-    .sport-opt:active,.sport-opt:hover{background:rgba(0,230,118,.12);color:#fff}
-    .sport-opt.no-result{color:var(--text-dim);font-style:italic;cursor:default;font-size:12.5px}
-
-    /* ── AUTH STATUS ── */
-    .auth-status{padding:11px 14px;border-radius:var(--r-sm);font-size:13px;
-      font-weight:600;margin-bottom:13px;border:1px solid;text-align:center;letter-spacing:.1px}
-    .auth-status.ok{background:var(--ok-bg);border-color:var(--ok-border);color:var(--ok)}
-    .auth-status.warn{background:rgba(255,171,0,.08);border-color:rgba(255,171,0,.3);color:#ffab00}
-    .auth-status.err{background:var(--err-bg);border-color:var(--err-border);color:var(--err)}
-
-    /* ── MISC ── */
-    .divider{height:1px;background:var(--border);margin:13px 0}
-    .hint{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:13px}
-    .hint a{color:var(--blue);text-decoration:none}.hint a:hover{text-decoration:underline}
-    a{color:var(--blue);text-decoration:none}.a:hover{text-decoration:underline}
-
-    /* ── SPINNER ── */
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .spin{width:16px;height:16px;border-radius:50%;animation:spin .6s linear infinite;border:2px solid rgba(255,255,255,.2);border-top-color:rgba(255,255,255,.85)}
-    .spin-dark{border-color:rgba(7,9,15,.2);border-top-color:rgba(7,9,15,.85)}
-  </style>
+.foot{text-align:center;padding:26px 0 8px;font-size:11.5px;color:var(--dim);line-height:1.7}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);
+  border-top-color:rgba(255,255,255,.85);animation:sp .6s linear infinite}
+.spin.dark{border-color:rgba(6,9,15,.25);border-top-color:rgba(6,9,15,.85)}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-badge"><span class="dot"></span>Bot Operativo</div>
-  <h1><em>UAI</em><br>SPORT<br>BOT</h1>
-  <p class="hdr-sub">Automatización de reservas deportivas en el intranet UAI — todos los días a las 20:00</p>
-</div>
-
 <div class="wrap">
 
-  <!-- STATUS STRIP -->
-  <div class="status-strip">
-    <div class="ss-left">
-      <div class="ss-icon">⚡</div>
-      <div>
-        <div class="ss-title">GitHub Actions Activo</div>
-        <div class="ss-sub">Corre automáticamente · Sin necesitar tu computador</div>
-      </div>
+  <header class="top">
+    <div class="brand"><em>UAI</em> SPORT BOT</div>
+    <div class="live" id="live"><span class="dot"></span><span id="live-t">Activo</span></div>
+  </header>
+
+  <!-- ══ HÉROE: LA DECISIÓN DE MAÑANA ══ -->
+  <main class="hero" id="hero">
+    <div class="hero-top">
+      <span class="eyebrow">Próxima reserva</span>
+      <span class="hero-date" id="h-date">—</span>
     </div>
-    <div class="ss-badge"><span class="dot"></span>LIVE</div>
-  </div>
 
-  <div class="sec-heading">Configuración en 4 pasos</div>
+    <div class="plan" id="h-plan"></div>
 
-  <!-- ── PASO 1: TOKEN ── -->
-  <div class="scard" id="c1">
-    <div class="scard-hdr" onclick="toggle('c1')">
-      <div class="step-num" id="n1">1</div>
-      <div class="scard-info">
-        <div class="scard-title">Acceso GitHub</div>
-        <div class="scard-desc">Conecta esta app con tu cuenta de GitHub</div>
+    <div class="night">
+      <div class="night-track">
+        <div class="night-fill" id="n-fill" style="width:0%"></div>
+        <div class="night-mark" id="n-mark"></div>
       </div>
-      <span class="chevron">⌄</span>
+      <div class="night-legend">
+        <span id="n-a">ahora</span>
+        <span><b>20:00</b> el bot reserva</span>
+      </div>
+      <p class="night-msg" id="n-msg"></p>
     </div>
-    <div class="scard-sep"></div>
-    <div class="scard-body">
-      <div class="purpose">
-        <span class="purpose-icon">💡</span>
-        <span class="purpose-text">
-          <strong>¿Para qué sirve este paso?</strong>
-          Esta app necesita un token para poder guardar tus cambios (reservas, sesión) directamente en GitHub desde tu teléfono. El token se queda guardado solo en este dispositivo, nunca se envía a ningún servidor externo.
-        </span>
-      </div>
-      <div class="lbl">Personal Access Token (PAT) <span class="lbl-tag">Solo se guarda aquí</span></div>
-      <input type="password" id="pat" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-      <p class="hint">Necesitas un token con permiso <strong style="color:var(--text)">repo</strong>. Se crea una sola vez.<br>
-        <a href="https://github.com/settings/tokens/new?scopes=repo&description=UAI+Sport+Bot+Config" target="_blank">→ Crear token en GitHub (2 min)</a>
-      </p>
-      <button class="btn btn-primary" onclick="savePAT(this)">Guardar token en este dispositivo</button>
-      <div id="s-pat" class="status"></div>
+
+    <div class="hero-act" id="h-act">
+      <button class="btn btn-primary" id="b-change" onclick="openEditor()">Cambiar</button>
+      <button class="btn btn-warn" id="b-skip" onclick="skipDay()">No reservar</button>
     </div>
-  </div>
 
-  <!-- ── PASO 2: RESERVAS ── -->
-  <div class="scard" id="c2">
-    <div class="scard-hdr" onclick="toggle('c2')">
-      <div class="step-num" id="n2">2</div>
-      <div class="scard-info">
-        <div class="scard-title">Mis Reservas</div>
-        <div class="scard-desc">Qué deporte, a qué hora y qué días reservar</div>
+    <div class="editor" id="editor">
+      <label class="lbl" for="e-sport">Deporte</label>
+      <div class="sport" id="e-wrap">
+        <input type="text" id="e-sport" placeholder="Escribe o elige…" autocomplete="off">
+        <div class="sport-dd" id="e-dd"></div>
       </div>
-      <span class="chevron">⌄</span>
+      <label class="lbl" for="e-time">Hora de inicio</label>
+      <input type="time" id="e-time" value="11:30">
+      <p class="note">Se reserva a esa hora exacta. Si no queda cupo, el bot te avisa en vez de tomar otro horario.</p>
+      <button class="btn btn-primary" id="b-save-ovr" onclick="saveOverride(this)">Guardar</button>
+      <button class="btn btn-ghost" onclick="closeEditor()">Cancelar</button>
+      <div class="msg" id="m-ovr"></div>
     </div>
-    <div class="scard-sep"></div>
-    <div class="scard-body">
-      <div class="purpose">
-        <span class="purpose-icon">💡</span>
-        <span class="purpose-text">
-          <strong>¿Para qué sirve este paso?</strong>
-          Aquí defines tu horario deportivo. El bot buscará exactamente ese deporte y esa hora en el intranet, y reservará automáticamente cuando se abran los cupos (cada día a las 20:00). Puedes agregar múltiples deportes.
-        </span>
-      </div>
-      <div id="rlist"></div>
-      <button class="btn btn-ghost" onclick="addR()">+ Agregar deporte</button>
-      <div class="divider"></div>
-      <button class="btn btn-primary" onclick="saveConfig(this)">💾 Guardar deporte</button>
-      <div id="s-cfg" class="status"></div>
+  </main>
+
+  <!-- ══ HORARIO SEMANAL ══ -->
+  <section class="sec" id="s-week">
+    <button class="sec-hd" onclick="toggle('s-week')" aria-expanded="false">
+      <span class="sec-ico">🗓️</span>
+      <span class="sec-tt"><h2>Horario semanal</h2><p id="week-sum">Lo que se reserva cuando no eliges nada</p></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="sec-bd">
+      <p class="note">Tu rutina fija. Cada noche el bot reserva lo que corresponda al día siguiente, salvo que hayas elegido otra cosa arriba.</p>
+      <div id="week-list"></div>
+      <button class="btn btn-ghost" onclick="addR()">Agregar deporte</button>
+      <div class="rule"></div>
+      <button class="btn btn-primary" onclick="saveWeek(this)">Guardar horario</button>
+      <div class="msg" id="m-week"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ── PASO 3: SESIÓN ── -->
-  <div class="scard" id="c3">
-    <div class="scard-hdr" onclick="toggle('c3')">
-      <div class="step-num" id="n3">3</div>
-      <div class="scard-info">
-        <div class="scard-title">Sesión UAI</div>
-        <div class="scard-desc">Autenticar acceso al intranet · dura ~90 días</div>
+  <!-- ══ SESIÓN ══ -->
+  <section class="sec" id="s-auth">
+    <button class="sec-hd" onclick="toggle('s-auth')" aria-expanded="false">
+      <span class="sec-ico">🔑</span>
+      <span class="sec-tt"><h2>Sesión UAI</h2><p id="auth-sum">Estado del acceso al intranet</p></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="sec-bd">
+      <div class="state ok" id="auth-state">
+        <span style="font-size:19px" id="auth-emoji">✅</span>
+        <div><div class="state-t" id="auth-t">Sesión activa</div>
+             <div class="state-s" id="auth-s">El bot entró al intranet sin problemas.</div></div>
       </div>
-      <span class="chevron">⌄</span>
+      <p class="note">La sesión se renueva sola mientras el bot entre cada noche. Si alguna vez cae, te llega una notificación y se recupera desde tu Mac con un comando:</p>
+      <p class="note"><code>cd uai-sport-bot &amp;&amp; python save_cookies.py</code></p>
+      <p class="note">Se abre una ventana, inicias sesión con Microsoft, y el script guarda el acceso solo. No se guarda tu contraseña en ninguna parte.</p>
     </div>
-    <div class="scard-sep"></div>
-    <div class="scard-body">
-      <div class="purpose">
-        <span class="purpose-icon">💡</span>
-        <span class="purpose-text">
-          <strong>¿Para qué sirve?</strong>
-          El bot necesita tu sesión de Microsoft para entrar al intranet UAI. La sesión dura ~90 días. Cuando esté por vencer recibirás una notificación — solo toca "Autenticar", inicia sesión, y queda guardado automáticamente.
-        </span>
-      </div>
+  </section>
 
-      <div id="auth-status" style="display:none"></div>
-
-      <button class="btn btn-primary" style="font-size:15px;padding:15px" onclick="openAuth(this)">🔐 Autenticar en intranet UAI</button>
-      <div id="s-auth" class="status"></div>
-
-      <div class="divider"></div>
-
-      <div class="bk-box">
-        <div class="bk-title">📌 Primera vez — instalar marcador (una sola vez)</div>
-        <div class="bk-body">Para que al tocar "Autenticar" todo sea automático, guarda este marcador en Safari <strong style="color:#ffab00">una sola vez</strong>. Después de instalarlo, al autenticarte serás redirigido aquí automáticamente con la sesión guardada.</div>
-        <button class="btn btn-sm btn-ghost" onclick="showBK(this)" style="margin-bottom:9px">▸ Ver código del marcador</button>
-        <div id="bk-block" style="display:none">
-          <textarea id="bk-txt" rows="3" readonly style="font-size:10px;margin-bottom:7px"></textarea>
-          <button class="btn btn-sm btn-blue" onclick="copyBK()">Copiar código</button>
-          <p class="hint" style="margin-top:9px">En Safari iPhone: guarda cualquier página como favorito → edítalo → borra la URL → pega el código → renómbralo <strong style="color:var(--text)">"UAI Capturar"</strong>.</p>
-        </div>
-      </div>
+  <!-- ══ AVISOS ══ -->
+  <section class="sec" id="s-notif">
+    <button class="sec-hd" onclick="toggle('s-notif')" aria-expanded="false">
+      <span class="sec-ico">🔔</span>
+      <span class="sec-tt"><h2>Avisos</h2><p>Qué pasó con tu reserva, cada noche</p></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="sec-bd">
+      <p class="note">A las 20:00 en punto te llega el resultado: reservado, sin cupos, o algo que necesita tu atención.</p>
+      <div class="step"><b>1</b><div><strong>Instala ntfy</strong><br>Gratis en App Store o Google Play.</div></div>
+      <div class="step"><b>2</b><div><strong>Suscríbete al canal</strong><br>Toca “+” y escribe:<br><span class="mono" style="display:inline-block;margin-top:5px">uai-sport-gaspar-unanue</span></div></div>
+      <div class="step" style="margin-bottom:14px"><b>3</b><div><strong>Compruébalo</strong><br>El botón de abajo manda una notificación de prueba.</div></div>
+      <button class="btn btn-blue" onclick="testNotif(this)">Enviar prueba</button>
+      <div class="msg" id="m-notif"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ── PASO 4: NOTIFICACIONES ── -->
-  <div class="scard" id="c4">
-    <div class="scard-hdr" onclick="toggle('c4')">
-      <div class="step-num" id="n4">4</div>
-      <div class="scard-info">
-        <div class="scard-title">Notificaciones</div>
-        <div class="scard-desc">Avisos cuando el bot reserva, falla o necesita atención</div>
-      </div>
-      <span class="chevron">⌄</span>
+  <!-- ══ CONEXIÓN ══ -->
+  <section class="sec" id="s-pat">
+    <button class="sec-hd" onclick="toggle('s-pat')" aria-expanded="false">
+      <span class="sec-ico">🔗</span>
+      <span class="sec-tt"><h2>Conexión con GitHub</h2><p id="pat-sum">Necesaria para guardar tus cambios</p></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="sec-bd">
+      <p class="note">Esta app guarda tus elecciones directamente en tu repositorio. El token se queda en este teléfono y no viaja a ningún servidor que no sea GitHub.</p>
+      <label class="lbl" for="pat">Token de acceso personal</label>
+      <input type="password" id="pat" placeholder="ghp_…" autocomplete="off">
+      <p class="note">Necesita el permiso <strong style="color:var(--text)">repo</strong>. Se crea una sola vez.<br>
+        <a href="https://github.com/settings/tokens/new?scopes=repo&description=UAI+Sport+Bot" target="_blank" rel="noopener">Crear el token en GitHub →</a></p>
+      <button class="btn btn-primary" onclick="savePAT(this)">Guardar token</button>
+      <div class="msg" id="m-pat"></div>
     </div>
-    <div class="scard-sep"></div>
-    <div class="scard-body">
-      <div class="purpose">
-        <span class="purpose-icon">💡</span>
-        <span class="purpose-text">
-          <strong>¿Para qué sirve este paso?</strong>
-          Después de cada intento de reserva recibirás una notificación: ✅ Reservado, ❌ Sin cupos, ℹ️ Ya inscrito, o ⚠️ Sesión expirada. Así siempre sabes qué pasó sin necesitar revisar el bot manualmente.
-        </span>
-      </div>
+  </section>
 
-      <div class="lbl">Configuración (solo se hace una vez)</div>
-      <div class="nstep">
-        <div class="nstep-n">1</div>
-        <div class="nstep-text"><strong>Descarga la app ntfy</strong><br>Gratis en App Store (iPhone) o Google Play (Android). Es la app que recibirá todas las notificaciones del bot.</div>
-      </div>
-      <div class="nstep">
-        <div class="nstep-n">2</div>
-        <div class="nstep-text"><strong>Suscríbete al canal del bot</strong><br>Abre ntfy → toca "+" → escribe exactamente:<div><span class="ntopic">uai-sport-gaspar-unanue</span></div></div>
-      </div>
-      <div class="nstep" style="margin-bottom:15px">
-        <div class="nstep-n">3</div>
-        <div class="nstep-text"><strong>Prueba que funciona</strong><br>Toca el botón de abajo — deberías recibir una notificación de prueba en segundos.</div>
-      </div>
-      <button class="btn btn-blue" onclick="testNotif(this)">📨 Enviar notificación de prueba</button>
-      <div id="s-notif" class="status"></div>
-    </div>
-  </div>
+  <p class="foot">El bot reserva todas las noches a las 20:00 en punto.<br>No necesitas tener el teléfono encendido.</p>
+</div>
 
-</div><!-- /wrap -->
-
-<script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.11/dist/modules/libsodium-wrappers.js"></script>
 <script>
-const OWN = 'gasparunanuev', REPO = 'uai-sport-bot', NTFY = 'uai-sport-gaspar-unanue';
-const DIAS = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
-const DS   = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
-const DEPORTES = [
-  'Futbolito Hombres','Futbolito Damas','Futbolito Mixto',
-  'Tenis','Pádel','Básquetbol','Básquetbol Mixto',
-  'Vóleibol','Vóleibol Mixto','Squash','Tenis de Mesa','Badminton','Natación'
-];
+const OWN='gasparunanuev', REPO='uai-sport-bot', NTFY='uai-sport-gaspar-unanue';
+const DIAS=['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+const DS=['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+const RESPALDO=['Futbolito Hombres','Futbolito Damas','Futbolito Mixto','Gimnasio','Core',
+  'Tenis','Pádel','Básquetbol','Vóleibol','Squash','Tenis de Mesa','Natación'];
+let DEPORTES=RESPALDO.slice();
 
-const BK = `javascript:(function(){var c=document.cookie.split(';').filter(Boolean).map(function(p){var i=p.indexOf('=');return{name:p.substring(0,i).trim(),value:p.substring(i+1).trim(),domain:'intranet.uai.cl',path:'/',expires:-1,httpOnly:false,secure:true,sameSite:'Lax'};});window.location.href='https://gasparunanuev.github.io/uai-sport-config/#auth='+btoa(unescape(encodeURIComponent(JSON.stringify(c))));})();`;
-document.getElementById('bk-txt').value = BK;
+const CIERRE_H=19, CIERRE_M=45, RESERVA_H=20;
+const TZ={timeZone:'America/Santiago'};
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-// ── ACCORDION ──
-function toggle(id) {
-  const c = document.getElementById(id), open = c.classList.contains('open');
-  document.querySelectorAll('.scard').forEach(x => x.classList.remove('open','active'));
-  if (!open) { c.classList.add('open','active'); }
+let cfg={version:2,recurrentes:[],overrides:{}}, sha='', objetivo='', cargado=false;
+
+/* ── TIEMPO EN ZONA CHILENA ── */
+const fechaCL=d=>new Intl.DateTimeFormat('sv-SE',TZ).format(d);
+function relojCL(d=new Date()){
+  const p=new Intl.DateTimeFormat('en-GB',{...TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(d);
+  const g=t=>parseInt(p.find(x=>x.type===t).value,10);
+  return g('hour')*3600+g('minute')*60+g('second');
+}
+/* Después de las 20:00 el bot ya reservó para mañana: lo próximo que puedes decidir es el día subsiguiente. */
+function fechaObjetivo(){
+  const dias=relojCL()>=RESERVA_H*3600?2:1;
+  return fechaCL(new Date(Date.now()+dias*86400000));
+}
+function etiquetaFecha(iso){
+  const [a,m,d]=iso.split('-').map(Number);
+  const dow=new Date(Date.UTC(a,m-1,d)).getUTCDay();
+  const nom=DIAS[(dow+6)%7];
+  return nom.charAt(0).toUpperCase()+nom.slice(1)+' '+d+' de '+MESES[m-1];
+}
+const cerrado=()=>relojCL()>=CIERRE_H*3600+CIERRE_M*60;
+
+/* ── RESOLUCIÓN: MISMA REGLA QUE agenda.py ── */
+function resolver(fecha){
+  if(Object.prototype.hasOwnProperty.call(cfg.overrides,fecha)){
+    const p=cfg.overrides[fecha];
+    return p===null?{tipo:'skip'}:{tipo:'pick',plan:p};
+  }
+  const [a,m,d]=fecha.split('-').map(Number);
+  const dow=new Date(Date.UTC(a,m-1,d)).getUTCDay();
+  const dia=DIAS[(dow+6)%7];
+  const hit=(cfg.recurrentes||[]).find(r=>(r.dias||[]).some(x=>norm(x)===dia));
+  return hit?{tipo:'week',plan:hit}:{tipo:'none'};
+}
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ── PINTAR EL HÉROE ── */
+function render(){
+  objetivo=fechaObjetivo();
+  const r=resolver(objetivo), hero=document.getElementById('hero');
+  document.getElementById('h-date').textContent=etiquetaFecha(objetivo);
+
+  let html='', cls='';
+  if(r.tipo==='skip'){
+    html='<div class="plan-none">Sin reserva</div>'+
+         '<p class="plan-sub">Elegiste saltarte este día. El bot no va a reservar nada.</p>'+
+         '<span class="src skip">Tu decisión</span>';
+    cls='empty';
+  }else if(r.tipo==='none'){
+    html='<div class="plan-none">Nada programado</div>'+
+         '<p class="plan-sub">Ese día no está en tu horario semanal. Toca Cambiar para reservar algo.</p>';
+    cls='empty';
+  }else{
+    html='<div class="plan-sport">'+esc(r.plan.deporte)+'</div>'+
+         '<div class="plan-time"><b>'+esc(r.plan.hora_inicio)+'</b><span>hora de inicio</span></div>'+
+         (r.tipo==='pick'
+           ? '<span class="src pick">Elegido por ti</span>'
+           : '<span class="src">De tu horario semanal</span>');
+  }
+  document.getElementById('h-plan').innerHTML=html;
+
+  const lock=cerrado();
+  hero.className='hero'+(cls?' '+cls:'')+(lock?' locked':'');
+  document.getElementById('b-change').disabled=lock;
+  document.getElementById('b-skip').disabled=lock||r.tipo==='skip';
+  document.getElementById('b-skip').textContent=r.tipo==='skip'?'Sin reserva':'No reservar';
+  if(lock) closeEditor();
+
+  pintarBarra(lock);
+  resumenSemana();
 }
 
-function showBK(btn) {
-  const b = document.getElementById('bk-block');
-  const show = b.style.display === 'none';
-  b.style.display = show ? 'block' : 'none';
-  btn.textContent = show ? '▾ Ocultar código' : '▸ Ver código del marcador';
-}
-function copyBK() {
-  const t = document.getElementById('bk-txt');
-  t.select(); t.setSelectionRange(0,99999);
-  navigator.clipboard.writeText(t.value).then(()=>alert('Código copiado. Ahora pégalo como URL de un favorito en Safari.')).catch(()=>{document.execCommand('copy');alert('Código copiado.');});
-}
+/* ── SIGNATURE: LA BARRA DE LA NOCHE ── */
+function pintarBarra(lock){
+  const ahora=relojCL(), cierre=CIERRE_H*3600+CIERRE_M*60, reserva=RESERVA_H*3600;
+  const desde=12*3600;                       // la barra cubre de mediodía a las 20:00
+  const pct=Math.max(0,Math.min(100,(ahora-desde)/(reserva-desde)*100));
+  document.getElementById('n-fill').style.width=pct+'%';
+  document.getElementById('n-mark').style.left=((cierre-desde)/(reserva-desde)*100)+'%';
 
-// ── STATE ──
-let cfg = {reservas:[]}, sha = '';
+  const hh=String(Math.floor(ahora/3600)).padStart(2,'0');
+  const mm=String(Math.floor(ahora%3600/60)).padStart(2,'0');
+  document.getElementById('n-a').innerHTML='<b>'+hh+':'+mm+'</b> ahora';
 
-window.addEventListener('load', async () => {
-  const pat = localStorage.getItem('uai_pat');
-  if (pat) { document.getElementById('pat').value = pat; markDone('c1','n1'); }
-  updateAuthStatus();
-  if (await checkAuthRedirect()) return;
-  if (!pat) toggle('c1');
-  await loadCfg();
-});
-
-// ── PAT ──
-function savePAT(btn) {
-  const v = document.getElementById('pat').value.trim();
-  if (!v) { st('s-pat','err','Ingresa un token válido'); return; }
-  localStorage.setItem('uai_pat', v);
-  markDone('c1','n1');
-  st('s-pat','ok','✅ Token guardado. Ahora configura tus reservas en el Paso 2.');
-  setTimeout(()=>toggle('c2'),1100);
-}
-const getPAT = () => localStorage.getItem('uai_pat') || document.getElementById('pat').value.trim();
-
-// ── CONFIG LOAD ──
-async function loadCfg() {
-  try {
-    const pat = getPAT();
-    const h = pat ? {'Authorization':'token '+pat} : {};
-    const r = await fetch(`https://api.github.com/repos/${OWN}/${REPO}/contents/config.json`,{headers:h});
-    if (!r.ok) throw 0;
-    const d = await r.json();
-    sha = d.sha; cfg = JSON.parse(atob(d.content));
-    renderR();
-  } catch { renderR(); }
+  const msg=document.getElementById('n-msg');
+  if(ahora>=reserva){
+    msg.innerHTML='Ya se ejecutó la reserva de esta noche. Lo que decidas ahora corre <strong>mañana a las 20:00</strong>.';
+  }else if(lock){
+    const s=reserva-ahora;
+    msg.innerHTML='Cerrado para cambios. El bot reserva en <strong>'+
+      Math.floor(s/60)+' min '+String(s%60).padStart(2,'0')+' s</strong>.';
+  }else{
+    const s=cierre-ahora, h=Math.floor(s/3600), m=Math.floor(s%3600/60);
+    msg.innerHTML='Puedes cambiar hasta las 19:45 — quedan <strong>'+
+      (h>0?h+' h '+String(m).padStart(2,'0')+' min':m+' min '+String(s%60).padStart(2,'0')+' s')+'</strong>.';
+  }
 }
 
-// ── RESERVAS ──
-function renderR() {
-  const c = document.getElementById('rlist'); c.innerHTML = '';
-  if (!cfg.reservas?.length) {
-    c.innerHTML = '<p class="hint" style="margin-bottom:11px">Sin deportes configurados aún. Agrega uno con el botón de abajo.</p>';
+/* ── EDITOR DE MAÑANA ── */
+function openEditor(){
+  const r=resolver(objetivo);
+  document.getElementById('e-sport').value=r.plan?r.plan.deporte:'';
+  document.getElementById('e-time').value=r.plan?r.plan.hora_inicio:'11:30';
+  document.getElementById('b-save-ovr').textContent='Guardar para el '+etiquetaFecha(objetivo).toLowerCase();
+  document.getElementById('editor').classList.add('open');
+  document.getElementById('editor').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeEditor(){
+  document.getElementById('editor').classList.remove('open');
+  msg('m-ovr','','');
+}
+async function saveOverride(btn){
+  const dep=document.getElementById('e-sport').value.trim();
+  const hora=document.getElementById('e-time').value;
+  if(!dep){ msg('m-ovr','err','Escribe o elige un deporte.'); return; }
+  if(!hora){ msg('m-ovr','err','Indica la hora de inicio.'); return; }
+  cfg.overrides[objetivo]={deporte:dep,hora_inicio:hora};
+  if(await push(btn,'m-ovr','Guardado. El bot reservará '+dep+' a las '+hora+'.')){
+    closeEditor(); render();
+  }
+}
+async function skipDay(){
+  cfg.overrides[objetivo]=null;
+  if(await push(document.getElementById('b-skip'),'m-ovr','Listo. Ese día no se reserva nada.')) render();
+}
+
+/* ── HORARIO SEMANAL ── */
+function resumenSemana(){
+  const n=(cfg.recurrentes||[]).length;
+  const el=document.getElementById('week-sum');
+  el.textContent=n?cfg.recurrentes.map(r=>r.deporte+' '+r.hora_inicio).join(' · ')
+                  :'Sin rutina fija todavía';
+}
+function renderWeek(){
+  const c=document.getElementById('week-list'); c.innerHTML='';
+  if(!(cfg.recurrentes||[]).length){
+    c.innerHTML='<p class="note">Todavía no tienes rutina. Agrega un deporte para que el bot reserve solo.</p>';
     return;
   }
-  cfg.reservas.forEach((r,i) => c.appendChild(mkR(r,i)));
+  cfg.recurrentes.forEach((r,i)=>c.appendChild(itemR(r,i)));
 }
-
-function mkR(r,i) {
-  const d = document.createElement('div'); d.className='ritem';
-  d.innerHTML = `
-    <div class="ritem-hdr"><span class="ritem-label">Deporte ${i+1}</span><button class="btn-x" onclick="delR(${i})">×</button></div>
-    <div class="lbl">Nombre del deporte</div>
-    <div class="sport-wrap">
-      <input type="text" class="sport-inp" placeholder="Buscar deporte..." value="${esc(r.deporte||'')}" data-i="${i}" data-f="dep" autocomplete="off">
-      <div class="sport-dd"></div>
-    </div>
-    <div class="lbl">Hora de inicio</div>
-    <input type="time" value="${r.hora_inicio||'16:30'}" data-i="${i}" data-f="hora">
-    <div class="dp-lbl">Días que quieres jugar (toca para seleccionar)</div>
-    <div class="dp">${DIAS.map((dia,j)=>`<button class="dp-btn${(r.dias||[]).includes(dia)?' active':''}" onclick="toggleD(this,'${dia}',${i})">${DS[j]}</button>`).join('')}</div>`;
-  d.querySelector('[data-f="hora"]').addEventListener('input', syncR);
-  initSportSelect(d.querySelector('.sport-wrap'));
+function itemR(r,i){
+  const d=document.createElement('div'); d.className='ritem';
+  d.innerHTML='<div class="ritem-hd"><span>Deporte '+(i+1)+'</span>'+
+    '<button class="x" onclick="delR('+i+')" aria-label="Quitar">×</button></div>'+
+    '<label class="lbl">Deporte</label>'+
+    '<div class="sport"><input type="text" class="w-dep" value="'+esc(r.deporte)+'" placeholder="Buscar…" autocomplete="off"><div class="sport-dd"></div></div>'+
+    '<label class="lbl">Hora de inicio</label>'+
+    '<input type="time" class="w-hora" value="'+(r.hora_inicio||'16:30')+'">'+
+    '<label class="lbl">Días que juegas</label>'+
+    '<div class="days">'+DIAS.map((dia,j)=>'<button class="day'+((r.dias||[]).some(x=>norm(x)===dia)?' on':'')+
+      '" data-d="'+dia+'" onclick="this.classList.toggle(\'on\');syncWeek()">'+DS[j]+'</button>').join('')+'</div>';
+  d.querySelector('.w-hora').addEventListener('input',syncWeek);
+  autocomplete(d.querySelector('.sport'));
   return d;
 }
-
-function initSportSelect(wrap) {
-  const inp = wrap.querySelector('.sport-inp');
-  const dd  = wrap.querySelector('.sport-dd');
-
-  function renderDD(q) {
-    const matches = DEPORTES.filter(s => !q || s.toLowerCase().includes(q.toLowerCase()));
-    dd.innerHTML = matches.length
-      ? matches.map(s => `<div class="sport-opt">${esc(s)}</div>`).join('')
-      : '<div class="sport-opt no-result">No encontrado — puedes escribir el nombre exacto</div>';
-  }
-
-  inp.addEventListener('focus', () => { renderDD(inp.value); wrap.classList.add('open'); });
-  inp.addEventListener('input', () => { renderDD(inp.value); wrap.classList.add('open'); syncR(); });
-  inp.addEventListener('blur',  () => setTimeout(() => wrap.classList.remove('open'), 200));
-
-  dd.addEventListener('mousedown', e => {
-    e.preventDefault();
-    const opt = e.target.closest('.sport-opt:not(.no-result)');
-    if (!opt) return;
-    inp.value = opt.textContent.trim();
-    wrap.classList.remove('open');
-    syncR();
-  });
-  dd.addEventListener('touchstart', e => {
-    const opt = e.target.closest('.sport-opt:not(.no-result)');
-    if (!opt) return;
-    e.preventDefault();
-    inp.value = opt.textContent.trim();
-    wrap.classList.remove('open');
-    syncR();
-  }, {passive: false});
-}
-
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function toggleD(btn){ btn.classList.toggle('active'); syncR(); }
-function syncR() {
-  cfg.reservas = Array.from(document.querySelectorAll('.ritem')).map(el=>({
-    deporte: el.querySelector('[data-f="dep"]').value,
-    hora_inicio: el.querySelector('[data-f="hora"]').value,
-    dias: Array.from(el.querySelectorAll('.dp-btn.active')).map(b=>DIAS[DS.indexOf(b.textContent)])
+function syncWeek(){
+  cfg.recurrentes=[...document.querySelectorAll('#week-list .ritem')].map(el=>({
+    deporte:el.querySelector('.w-dep').value.trim(),
+    hora_inicio:el.querySelector('.w-hora').value,
+    dias:[...el.querySelectorAll('.day.on')].map(b=>b.dataset.d)
   }));
+  resumenSemana();
 }
-function addR() {
-  syncR(); cfg.reservas.push({deporte:'',hora_inicio:'16:30',dias:[]});
-  renderR();
-}
-function delR(i) { syncR(); cfg.reservas.splice(i,1); renderR(); }
-
-async function saveConfig(btn) {
-  syncR();
-  const pat = getPAT();
-  if (!pat) { st('s-cfg','err','Primero guarda tu GitHub token en el Paso 1'); return; }
-  load(btn,true,true);
-  st('s-cfg','inf','Guardando en GitHub...');
-  try {
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(cfg,null,2)+'\n')));
-    const body = {message:'Update config via web app',content};
-    if (sha) body.sha = sha;
-    const r = await fetch(`https://api.github.com/repos/${OWN}/${REPO}/contents/config.json`,{
-      method:'PUT', headers:{'Authorization':'token '+pat,'Content-Type':'application/json'}, body:JSON.stringify(body)
-    });
-    if (!r.ok) { const e=await r.json(); throw new Error(e.message||r.status); }
-    const data = await r.json(); sha = data.content.sha;
-    markDone('c2','n2');
-    st('s-cfg','ok',`✅ Guardado. El bot reservará ${cfg.reservas.length} deporte(s) según lo configurado.`);
-  } catch(e) { st('s-cfg','err','Error: '+e.message+'. Verifica que el token sea válido.'); }
-  finally { load(btn,false,true); }
+function addR(){ syncWeek(); cfg.recurrentes.push({deporte:'',hora_inicio:'16:30',dias:[]}); renderWeek(); }
+function delR(i){ syncWeek(); cfg.recurrentes.splice(i,1); renderWeek(); resumenSemana(); }
+async function saveWeek(btn){
+  syncWeek();
+  if(cfg.recurrentes.some(r=>!r.deporte)){ msg('m-week','err','Hay un deporte sin nombre.'); return; }
+  if(await push(btn,'m-week','Horario guardado.')) render();
 }
 
-// ── SESIÓN ──
-function openAuth(btn) {
-  if (!getPAT()) { st('s-auth','err','Primero guarda tu GitHub token en el Paso 1'); return; }
-  st('s-auth','inf','Inicia sesión con Microsoft en el intranet. Luego toca el marcador "UAI Capturar" en Safari y volverás aquí automáticamente con la sesión guardada.');
-  window.open('https://intranet.uai.cl/WebPages/Deporte/Reservas.aspx','_blank');
+/* ── AUTOCOMPLETADO ── */
+function autocomplete(wrap){
+  const inp=wrap.querySelector('input'), dd=wrap.querySelector('.sport-dd');
+  const draw=q=>{
+    const hit=DEPORTES.filter(s=>!q||norm(s).includes(norm(q)));
+    dd.innerHTML=hit.length?hit.map(s=>'<div class="sport-opt">'+esc(s)+'</div>').join('')
+      :'<div class="sport-opt none">No está en la lista — puedes escribirlo igual</div>';
+  };
+  inp.addEventListener('focus',()=>{draw(inp.value);wrap.classList.add('open')});
+  inp.addEventListener('input',()=>{draw(inp.value);wrap.classList.add('open');syncWeek()});
+  inp.addEventListener('blur',()=>setTimeout(()=>wrap.classList.remove('open'),180));
+  const pick=e=>{
+    const o=e.target.closest('.sport-opt:not(.none)'); if(!o) return;
+    e.preventDefault(); inp.value=o.textContent.trim(); wrap.classList.remove('open'); syncWeek();
+  };
+  dd.addEventListener('mousedown',pick);
+  dd.addEventListener('touchstart',pick,{passive:false});
 }
 
-async function checkAuthRedirect() {
-  const hash = location.hash;
-  if (!hash.startsWith('#auth=')) return false;
-  const encoded = hash.slice(6);
-  history.replaceState(null, '', location.pathname);
-  await loadCfg();
-  toggle('c3');
-  const pat = getPAT();
-  if (!pat) { st('s-auth','err','Primero guarda tu GitHub token en el Paso 1'); return true; }
-  st('s-auth','inf','Guardando sesión...');
-  try {
-    const txt = decodeURIComponent(escape(atob(encoded)));
-    JSON.parse(txt);
-    await uploadCookies(txt);
-  } catch(e) { st('s-auth','err','Error al procesar sesión: '+e.message); }
-  return true;
+/* ── GITHUB ── */
+const getPAT=()=>localStorage.getItem('uai_pat')||'';
+function savePAT(btn){
+  const v=document.getElementById('pat').value.trim();
+  if(!v){ msg('m-pat','err','Pega el token para continuar.'); return; }
+  localStorage.setItem('uai_pat',v);
+  document.getElementById('s-pat').classList.add('done');
+  document.getElementById('pat-sum').textContent='Conectado';
+  msg('m-pat','ok','Token guardado en este teléfono.');
+  cargar();
 }
-
-async function uploadCookies(txt) {
-  const pat = getPAT();
-  try {
-    await sodium.ready;
-    const kr = await fetch(`https://api.github.com/repos/${OWN}/${REPO}/actions/secrets/public-key`,{headers:{'Authorization':'token '+pat}});
-    if (!kr.ok) throw new Error('Token sin permiso "repo"');
-    const kd = await kr.json();
-    const enc = sodium.crypto_box_seal(sodium.from_string(txt), sodium.from_base64(kd.key, sodium.base64_variants.ORIGINAL));
-    const sr = await fetch(`https://api.github.com/repos/${OWN}/${REPO}/actions/secrets/COOKIES_JSON`,{
-      method:'PUT', headers:{'Authorization':'token '+pat,'Content-Type':'application/json'},
-      body:JSON.stringify({encrypted_value:sodium.to_base64(enc,sodium.base64_variants.ORIGINAL),key_id:kd.key_id})
-    });
-    if (!sr.ok && sr.status!==204) throw new Error('Error '+sr.status);
-    localStorage.setItem('uai_auth_ts', Date.now().toString());
-    markDone('c3','n3');
-    updateAuthStatus();
-    st('s-auth','ok','✅ Sesión guardada por ~90 días. Recibirás una notificación cuando esté por vencer.');
-  } catch(e) { st('s-auth','err','Error: '+e.message); }
+async function cargar(){
+  const pat=getPAT(), h=pat?{Authorization:'token '+pat}:{};
+  try{
+    const r=await fetch('https://api.github.com/repos/'+OWN+'/'+REPO+'/contents/config.json',{headers:h,cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json(); sha=d.sha;
+    cfg=normalizar(JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))))));
+    cargado=true;
+  }catch(e){
+    /* Sin lectura no se guarda: escribir sobre un cfg vacio borraria la agenda real. */
+    cargado=false;
+    document.getElementById('live').className='live off';
+    document.getElementById('live-t').textContent='Sin datos';
+  }
+  renderWeek(); render();
 }
-
-function updateAuthStatus() {
-  const el = document.getElementById('auth-status');
-  if (!el) return;
-  const ts = localStorage.getItem('uai_auth_ts');
-  if (!ts) { el.style.display='none'; return; }
-  const rem = 90 - Math.floor((Date.now()-parseInt(ts))/86400000);
-  el.style.display = 'block';
-  if (rem > 14) {
-    el.className='auth-status ok'; el.textContent='✅ Sesión activa — quedan '+rem+' días';
-  } else if (rem > 0) {
-    el.className='auth-status warn'; el.textContent='⚠️ Por vencer — quedan '+rem+' días, renueva pronto';
-  } else {
-    el.className='auth-status err'; el.textContent='❌ Sesión expirada — toca "Autenticar" para renovar';
+/* Acepta v1 y v2, igual que agenda.py. Nunca pierde overrides. */
+function normalizar(c){
+  if(c.reservas && !c.recurrentes) return {version:2,recurrentes:c.reservas,overrides:{}};
+  return {version:2,recurrentes:c.recurrentes||[],overrides:c.overrides||{}};
+}
+function limpiar(){
+  const hoy=fechaCL(new Date()), out={};
+  for(const k in cfg.overrides) if(k>=hoy) out[k]=cfg.overrides[k];
+  cfg.overrides=out;
+}
+async function push(btn,box,exito){
+  const pat=getPAT();
+  if(!pat){
+    msg(box,'err','Falta conectar GitHub. Ábrelo abajo en “Conexión con GitHub”.');
+    toggle('s-pat',true); return false;
+  }
+  if(!cargado){
+    msg(box,'err','No se pudo leer tu agenda actual, así que no se guarda nada: '+
+      'escribir ahora borraría lo que ya tienes. Recarga la página e inténtalo de nuevo.');
+    return false;
+  }
+  limpiar();
+  load(btn,true); msg(box,'inf','Guardando…');
+  try{
+    const cuerpo={version:2,recurrentes:cfg.recurrentes,overrides:cfg.overrides};
+    const body={message:'Actualizar agenda desde la app',
+      content:btoa(unescape(encodeURIComponent(JSON.stringify(cuerpo,null,2)+'\n')))};
+    if(sha) body.sha=sha;
+    const r=await fetch('https://api.github.com/repos/'+OWN+'/'+REPO+'/contents/config.json',
+      {method:'PUT',headers:{Authorization:'token '+pat,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.message||('Error '+r.status)); }
+    sha=(await r.json()).content.sha;
+    msg(box,'ok',exito); return true;
+  }catch(e){
+    msg(box,'err',e.message.includes('409')||e.message.includes('sha')
+      ? 'Alguien más guardó primero. Recarga la página y vuelve a intentarlo.'
+      : 'No se pudo guardar: '+e.message);
+    return false;
+  }finally{ load(btn,false); }
+}
+async function catalogo(){
+  const pat=getPAT(), h=pat?{Authorization:'token '+pat}:{};
+  try{
+    const r=await fetch('https://api.github.com/repos/'+OWN+'/'+REPO+'/contents/catalogo.json',{headers:h,cache:'no-store'});
+    if(!r.ok) throw 0;
+    const d=JSON.parse(decodeURIComponent(escape(atob((await r.json()).content.replace(/\n/g,'')))));
+    if(d.deportes&&d.deportes.length) DEPORTES=d.deportes;
+    if(d.actualizado) estadoSesion(d.actualizado);
+  }catch(e){ /* aún no existe: se usa la lista de respaldo */ }
+}
+function estadoSesion(iso){
+  const dias=Math.floor((Date.now()-new Date(iso).getTime())/86400000);
+  const st=document.getElementById('auth-state');
+  if(dias<=1){
+    st.className='state ok';
+    document.getElementById('auth-emoji').textContent='✅';
+    document.getElementById('auth-t').textContent='Sesión activa';
+    document.getElementById('auth-s').textContent='El bot entró al intranet anoche sin problemas.';
+    document.getElementById('auth-sum').textContent='Activa';
+  }else{
+    st.className='state warn';
+    document.getElementById('auth-emoji').textContent='⚠️';
+    document.getElementById('auth-t').textContent='Sin señal hace '+dias+' días';
+    document.getElementById('auth-s').textContent='El bot no ha entrado. Revisa tus avisos o renueva la sesión.';
+    document.getElementById('auth-sum').textContent='Revisar';
+    document.getElementById('live').className='live off';
+    document.getElementById('live-t').textContent='Revisar';
   }
 }
 
-// ── NOTIFICATIONS ──
-async function testNotif(btn) {
-  load(btn,true,false);
-  st('s-notif','inf','Enviando notificación de prueba...');
-  try {
-    await fetch(`https://ntfy.sh/${NTFY}`,{method:'POST',body:'🧪 UAI Bot activo — las notificaciones funcionan correctamente.'});
-    markDone('c4','n4');
-    st('s-notif','ok','✅ Notificación enviada. Si no llega en 10 segundos, revisa que estés suscrito al tema correcto en la app ntfy.');
-  } catch(e) { st('s-notif','err','Error: '+e.message); }
-  finally { load(btn,false,false); }
+/* ── AVISOS ── */
+async function testNotif(btn){
+  load(btn,true); msg('m-notif','inf','Enviando…');
+  try{
+    await fetch('https://ntfy.sh/'+NTFY,{method:'POST',body:'Prueba desde la app — los avisos funcionan.'});
+    msg('m-notif','ok','Enviada. Si no llega en unos segundos, revisa que el canal esté bien escrito en ntfy.');
+  }catch(e){ msg('m-notif','err','No se pudo enviar: '+e.message); }
+  finally{ load(btn,false); }
 }
 
-// ── UTILS ──
-function st(id, type, msg) {
-  const el = document.getElementById(id);
-  el.className = 'status '+type; el.textContent = msg;
+/* ── UTILIDADES ── */
+function toggle(id,forzar){
+  const s=document.getElementById(id), abierto=s.classList.contains('open');
+  if(forzar&&abierto) return;
+  document.querySelectorAll('.sec').forEach(x=>{
+    x.classList.remove('open'); x.querySelector('.sec-hd').setAttribute('aria-expanded','false');
+  });
+  if(!abierto||forzar){ s.classList.add('open'); s.querySelector('.sec-hd').setAttribute('aria-expanded','true'); }
 }
-function markDone(cardId, numId) {
-  document.getElementById(cardId).classList.add('done');
-  document.getElementById(numId).textContent = '✓';
+function msg(id,tipo,texto){
+  const el=document.getElementById(id); if(!el) return;
+  el.className='msg'+(tipo?' '+tipo:''); el.textContent=texto;
 }
-function load(btn, on, isPrimary) {
-  if (!btn) return;
-  if (on) {
-    btn.dataset.o = btn.innerHTML;
-    btn.innerHTML = `<div class="spin${isPrimary?' spin-dark':''}"></div>`;
-    btn.disabled = true;
-  } else {
-    btn.innerHTML = btn.dataset.o || btn.innerHTML;
-    btn.disabled = false;
-  }
+function load(btn,on){
+  if(!btn) return;
+  if(on){ btn.dataset.h=btn.innerHTML; btn.innerHTML='<span class="spin'+(btn.classList.contains('btn-primary')?' dark':'')+'"></span>'; btn.disabled=true; }
+  else{ btn.innerHTML=btn.dataset.h||btn.innerHTML; btn.disabled=false; }
 }
+
+/* ── ARRANQUE ── */
+autocomplete(document.getElementById('e-wrap'));
+if(getPAT()){
+  document.getElementById('pat').value=getPAT();
+  document.getElementById('s-pat').classList.add('done');
+  document.getElementById('pat-sum').textContent='Conectado';
+}
+render();
+catalogo().then(cargar);
+setInterval(()=>pintarBarra(cerrado()),1000);
+setInterval(render,60000);
 </script>
 </body>
 </html>
