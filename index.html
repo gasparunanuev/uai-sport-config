@@ -399,6 +399,29 @@ function render(){
   const r=resolver(objetivo), hero=document.getElementById('hero');
   document.getElementById('h-date').textContent=etiquetaFecha(objetivo);
 
+  // Sin lectura no sabemos qué hay agendado. Decirlo es obligatorio: mostrar
+  // "Nada programado" cuando en realidad no pudimos leer haría que el usuario
+  // agregue una reserva encima de la que ya tenía.
+  if(!cargado){
+    const sinToken=!getPAT();
+    document.getElementById('h-plan').innerHTML=
+      '<div class="plan-none">'+(sinToken?'Falta conectar':'No pude leer tu agenda')+'</div>'+
+      '<p class="plan-sub">'+(sinToken
+        ? 'Esta app guarda tus elecciones en tu GitHub. Conéctala una vez y ya queda.'
+        : 'Puede ser falta de señal o un token vencido. Tu agenda sigue intacta — solo no la puedo mostrar.')+
+      '</p>';
+    hero.className='hero empty';
+    const bc=document.getElementById('b-change'), bs=document.getElementById('b-skip');
+    bc.disabled=false; bs.disabled=true;
+    bc.textContent=sinToken?'Conectar GitHub':'Reintentar';
+    bc.onclick=sinToken?()=>toggle('s-pat',true):()=>{cargar();catalogo();};
+    pintarBarra(cerrado());
+    resumenSemana();
+    return;
+  }
+  document.getElementById('b-change').textContent='Cambiar';
+  document.getElementById('b-change').onclick=openEditor;
+
   let html='', cls='';
   if(r.tipo==='skip'){
     html='<div class="plan-none">Sin reserva</div>'+
@@ -485,13 +508,19 @@ async function skipDay(){
 
 /* ── HORARIO SEMANAL ── */
 function resumenSemana(){
-  const n=(cfg.recurrentes||[]).length;
   const el=document.getElementById('week-sum');
+  if(!cargado){ el.textContent='No disponible sin conexión'; return; }
+  const n=(cfg.recurrentes||[]).length;
   el.textContent=n?cfg.recurrentes.map(r=>r.deporte+' '+r.hora_inicio).join(' · ')
                   :'Sin rutina fija todavía';
 }
 function renderWeek(){
   const c=document.getElementById('week-list'); c.innerHTML='';
+  if(!cargado){
+    c.innerHTML='<p class="note">No pude leer tu horario, así que no lo muestro para no confundirte. '+
+      'Conecta GitHub abajo o revisa tu señal.</p>';
+    return;
+  }
   if(!(cfg.recurrentes||[]).length){
     c.innerHTML='<p class="note">Todavía no tienes rutina. Agrega un deporte para que el bot reserve solo.</p>';
     return;
