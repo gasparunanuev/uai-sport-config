@@ -5,7 +5,7 @@
  * para que un deploy llegue de inmediato; la caché es solo la red de seguridad
  * cuando no hay señal.
  */
-const VERSION = 'uai-bot-v2';
+const VERSION = 'uai-bot-v3';
 const SHELL = [
   './',
   './index.html',

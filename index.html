@@ -46,8 +46,10 @@ body::before{content:'';position:fixed;inset:0;opacity:.35;pointer-events:none;z
 .brand{font-family:var(--fd);font-size:23px;letter-spacing:1.6px;color:#fff;line-height:1}
 .brand em{color:var(--accent);font-style:normal}
 .live{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);
-  border:1px solid var(--border-lit);border-radius:100px;padding:5px 11px;
-  font-size:10.5px;font-weight:700;color:var(--accent);letter-spacing:.7px;text-transform:uppercase}
+  border:1px solid var(--border-lit);border-radius:100px;padding:7px 12px;
+  font-family:var(--fb);font-size:10.5px;font-weight:700;color:var(--accent);
+  letter-spacing:.7px;text-transform:uppercase;cursor:pointer;transition:transform .14s}
+.live:active{transform:scale(.94)}
 .live.off{background:var(--orange-dim);border-color:rgba(255,112,67,.3);color:var(--orange)}
 .live .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -226,7 +228,10 @@ input[type=time]{font-family:var(--fm);letter-spacing:.5px}
 
   <header class="top">
     <div class="brand"><em>UAI</em> SPORT BOT</div>
-    <div class="live" id="live"><span class="dot"></span><span id="live-t">Activo</span></div>
+    <button class="live" id="live" onclick="toggle('s-auth',true)"
+            title="Estado del bot — toca para ver el detalle">
+      <span class="dot"></span><span id="live-t">Activo</span>
+    </button>
   </header>
 
   <!-- ══ HÉROE: LA DECISIÓN DE MAÑANA ══ -->
@@ -357,6 +362,19 @@ const TZ={timeZone:'America/Santiago'};
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
 let cfg={version:2,recurrentes:[],overrides:{}}, sha='', objetivo='', cargado=false;
+let catalogoISO=null;   // última vez que el bot entró al intranet
+
+/* Un solo lugar decide el chip. Antes cada función lo escribía por su cuenta y
+   nadie lo devolvía a "Activo" al recuperarse: quedaba pegado en "Sin datos". */
+function pintarChip(){
+  const el=document.getElementById('live'), t=document.getElementById('live-t');
+  if(!cargado){ el.className='live off'; t.textContent='Sin datos'; return; }
+  if(catalogoISO){
+    const dias=Math.floor((Date.now()-new Date(catalogoISO).getTime())/86400000);
+    if(dias>1){ el.className='live off'; t.textContent='Revisar'; return; }
+  }
+  el.className='live'; t.textContent='Activo';
+}
 
 /* ── TIEMPO EN ZONA CHILENA ── */
 const fechaCL=d=>new Intl.DateTimeFormat('sv-SE',TZ).format(d);
@@ -599,9 +617,8 @@ async function cargar(){
   }catch(e){
     /* Sin lectura no se guarda: escribir sobre un cfg vacio borraria la agenda real. */
     cargado=false;
-    document.getElementById('live').className='live off';
-    document.getElementById('live-t').textContent='Sin datos';
   }
+  pintarChip();
   renderWeek(); render();
 }
 /* Acepta v1 y v2, igual que agenda.py. Nunca pierde overrides. */
@@ -655,13 +672,14 @@ async function catalogo(){
   }catch(e){ /* aún no existe: se usa la lista de respaldo */ }
 }
 function estadoSesion(iso){
+  catalogoISO=iso;
   const dias=Math.floor((Date.now()-new Date(iso).getTime())/86400000);
   const st=document.getElementById('auth-state');
   if(dias<=1){
     st.className='state ok';
     document.getElementById('auth-emoji').textContent='✅';
     document.getElementById('auth-t').textContent='Sesión activa';
-    document.getElementById('auth-s').textContent='El bot entró al intranet anoche sin problemas.';
+    document.getElementById('auth-s').textContent='El bot entró al intranet en su última corrida.';
     document.getElementById('auth-sum').textContent='Activa';
   }else{
     st.className='state warn';
@@ -669,9 +687,8 @@ function estadoSesion(iso){
     document.getElementById('auth-t').textContent='Sin señal hace '+dias+' días';
     document.getElementById('auth-s').textContent='El bot no ha entrado. Revisa tus avisos o renueva la sesión.';
     document.getElementById('auth-sum').textContent='Revisar';
-    document.getElementById('live').className='live off';
-    document.getElementById('live-t').textContent='Revisar';
   }
+  pintarChip();
 }
 
 /* ── AVISOS ── */
